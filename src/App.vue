@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import VueDatePicker from "@vuepic/vue-datepicker"
 import "@vuepic/vue-datepicker/dist/main.css"
 
@@ -8,7 +8,6 @@ const date = ref(null)
 const startDate = ref(null)
 const endDate = ref(null)
 
-const days = ref("―")
 const annualCompensation = ref("―")
 const additionalCompensation = ref("―")
 
@@ -17,6 +16,11 @@ const additional = ref(7)
 const usedDays = ref(null)
 const sickDays = ref(null)
 const unpaidLeaveDays = ref(null)
+
+const daysWorking = computed(() => {
+  if (!startDate.value || !endDate.value) return "―"
+  return calculateWorkDays(startDate.value, endDate.value)
+})
 
 const formatDate = (date) => {
   if (!date) return ""
@@ -34,13 +38,24 @@ watch(date, (newDate) => {
     return
   }
   if (Array.isArray(newDate)) {
-    startDate.value = formatDate(newDate[0])
-    endDate.value = formatDate(newDate[1])
+    startDate.value = new Date(newDate[0])
+    endDate.value = new Date(newDate[1])
   } else {
-    startDate.value = formatDate(newDate)
-    endDate.value = null
+    return
   }
+
 })
+
+function calculateWorkDays(dateStart, dateEnd) {
+  const start = new Date(dateStart);
+  const end = new Date(dateEnd);
+  if (end < start) {
+    return "(\"Дата закінчення не може бути раніше дати початку\")";
+  }
+  const diffTime = Math.abs(end - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  return diffDays > 0 ? diffDays : "jr";
+}
 
 function calculatorAnnual(usedDays, vacationPerYear) {
   const compensation = (this.days / 365) * vacationPerYear - usedDays;
@@ -99,7 +114,7 @@ function roundNum(number) {
 
       <div class="flex gap-2 flex-col">
         <label for="">Використано днів відпустки:</label>
-        <input type="number" v-model="usedDays"  placeholder="0" class="w-full p-2 bg-[#212121]" />
+        <input type="number" v-model="usedDays" placeholder="0" class="w-full p-2 bg-[#212121]" />
       </div>
 
 
@@ -117,19 +132,21 @@ function roundNum(number) {
 
     <div class="bg-zinc-800 mt-6 w-full h-full p-6 flex flex-col gap-2 text-white shadow-[10px_10px_0_rgba(0,0,0,0.7)]">
       <h2 class="text-2xl">Результат</h2>
-      <p>Дати: <span class="font-bold">{{ startDate }}</span> — <span class="font-bold">{{ endDate }}</span></p>
-      <p>Робочі дні: <span>{{ days }}</span></p>
+      <p>Дати: <span class="font-bold">{{ formatDate(startDate) }}</span> — <span class="font-bold">{{ formatDate(endDate) }}</span></p>
+      <p>Робочі дні: <span>{{ daysWorking }}</span></p>
       <p>Щорічна компенсація: <span>{{ annualCompensation }}</span></p>
       <p>Додатковка компенсація: <span>{{ additionalCompensation }}</span></p>
       <hr>
       <p>Формлуа щорічної компенсації
         <br />
-        Робочі дні / 365 * {{ annual ? annual : "Дні щорічної основної" }} - {{ usedDays ? usedDays : "Використано днів" }}
+        {{ daysWorking ? daysWorking : "Робочі дні" }} / 365 * {{ annual ? annual : "Дні щорічної основної" }} - {{ usedDays ? usedDays : "Використано днів"
+        }}
       </p>
 
       <p>Формула додаткової компенсації
         <br />
-        {{ additional  ? additional : "Додаткові дні" }} * (Робочі дні - {{ sickDays ? sickDays : "Лікарняні дні"}} - {{ unpaidLeaveDays ? unpaidLeaveDays : "Дні без збереження"}}) / 365
+        {{ additional ? additional : "Додаткові дні" }} * ({{ daysWorking ? daysWorking : "Робочі дні" }}  - {{ sickDays ? sickDays : "Лікарняні дні" }} - {{
+          unpaidLeaveDays ? unpaidLeaveDays : "Дні без збереження"}}) / 365
       </p>
     </div>
   </div>
@@ -144,5 +161,4 @@ function roundNum(number) {
 .custom-input:focus {
   outline: solid;
 }
-
 </style>
