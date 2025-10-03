@@ -80,7 +80,7 @@ function calculatorAdditional(additionalDays, sickDays, unpaidLeaveDays, days) {
                 Дати
             </label>
             <VueDatePicker v-model="date" mode="date" range :partial-range="true" :enable-time="false"
-                :enable-time-picker="false" :format="'dd.MM.yyyy'" dark locale="uk" arrow-navigation
+                :enable-time-picker="false" :format="'dd.MM.yyyy'" dark locale="uk"  text-input arrow-navigation
                 :ui="{ input: 'custom-input' }" placeholder="Введіть дату" />
         </div>
 
