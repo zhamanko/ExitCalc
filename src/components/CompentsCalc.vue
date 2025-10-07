@@ -74,7 +74,7 @@ function calculatorAdditional(additionalDays, sickDays, unpaidLeaveDays, days) {
 
 <template>
 
-    <div class="bg-zinc-800 mt-6 w-full h-full flex flex-col gap-4 p-6 text-white shadow-[10px_10px_0_rgba(0,0,0,0.7)]">
+    <div class="bg-zinc-800 w-full h-full flex flex-col gap-4 p-6 text-white shadow-[10px_10px_0_rgba(0,0,0,0.7)]">
         <div class="flex gap-2 flex-col">
             <label for="date" class="">
                 Дати
